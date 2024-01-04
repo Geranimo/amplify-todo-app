@@ -1,4 +1,7 @@
-import React, { useState, useEffect, FormEvent } from "react";
+import React, { useState, useEffect } from "react";
+import "./App.css";
+import "@aws-amplify/ui-react/styles.css";
+import { API } from "aws-amplify";
 import {
   Button,
   Flex,
@@ -6,67 +9,46 @@ import {
   Text,
   TextField,
   View,
-  WithAuthenticatorProps,
   withAuthenticator,
 } from "@aws-amplify/ui-react";
-import "./App.css";
-import "@aws-amplify/ui-react/styles.css";
-import { listNotes } from "../src/graphql/queries";
+import { listNotes } from "./graphql/queries";
 import {
   createNote as createNoteMutation,
   deleteNote as deleteNoteMutation,
-} from "../src/graphql/mutations";
-import { CreateNoteInput, Note } from "@/src/API";
+} from "./graphql/mutations";
 
-import { Amplify } from "aws-amplify";
-import { generateClient } from "aws-amplify/api";
-import awsconfig from "@/src/amplifyconfiguration.json";
-
-Amplify.configure(awsconfig);
-
-const client = generateClient();
-
-const App = ({ signOut }: WithAuthenticatorProps) => {
-  const [notes, setNotes] = useState<Note[]>([]);
+const App = ({ signOut }) => {
+  const [notes, setNotes] = useState([]);
 
   useEffect(() => {
     fetchNotes();
   }, []);
 
   async function fetchNotes() {
-    const apiData = await client.graphql({ query: listNotes });
+    const apiData = await API.graphql({ query: listNotes });
     const notesFromAPI = apiData.data.listNotes.items;
     setNotes(notesFromAPI);
   }
 
-  async function createNote(event: FormEvent<HTMLFormElement>) {
-    const form = event.target as HTMLFormElement;
-
+  async function createNote(event) {
     event.preventDefault();
-
-    const formData = new FormData(form);
-
-    const data: CreateNoteInput = {
-      name: formData.get("name") as string,
-      description: formData.get("description") as string,
+    const form = new FormData(event.target);
+    const data = {
+      name: form.get("name"),
+      description: form.get("description"),
     };
-
-    await client.graphql({
+    await API.graphql({
       query: createNoteMutation,
       variables: { input: data },
     });
-
-    await fetchNotes();
-
-    form.reset();
+    fetchNotes();
+    event.target.reset();
   }
 
-  async function deleteNote({ id }: Note) {
+  async function deleteNote({ id }) {
     const newNotes = notes.filter((note) => note.id !== id);
-
     setNotes(newNotes);
-
-    await client.graphql({
+    await API.graphql({
       query: deleteNoteMutation,
       variables: { input: { id } },
     });
