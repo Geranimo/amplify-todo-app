@@ -1,0 +1,12 @@
+{
+  "resourceName": "imagestorage",
+  "policyUUID": "15ee52e8",
+  "bucketName": "amplifytodoapp4df4c0c1b54741d8b2590f4bdb3c4316",
+  "storageAccess": "auth",
+  "guestAccess": [],
+  "authAccess": [
+    "READ"
+  ],
+  "triggerFunction": "NONE",
+  "groupAccess": {}
+}

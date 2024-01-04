@@ -8,10 +8,9 @@
 import * as React from "react";
 import { Button, Flex, Grid, TextField } from "@aws-amplify/ui-react";
 import { fetchByPath, getOverrideProps, validateField } from "./utils";
-import { generateClient } from "aws-amplify/api";
+import { API } from "aws-amplify";
 import { getNote } from "../graphql/queries";
 import { updateNote } from "../graphql/mutations";
-const client = generateClient();
 export default function NoteUpdateForm(props) {
   const {
     id: idProp,
@@ -27,11 +26,13 @@ export default function NoteUpdateForm(props) {
   const initialValues = {
     name: "",
     description: "",
+    image: "",
   };
   const [name, setName] = React.useState(initialValues.name);
   const [description, setDescription] = React.useState(
     initialValues.description
   );
+  const [image, setImage] = React.useState(initialValues.image);
   const [errors, setErrors] = React.useState({});
   const resetStateValues = () => {
     const cleanValues = noteRecord
@@ -39,6 +40,7 @@ export default function NoteUpdateForm(props) {
       : initialValues;
     setName(cleanValues.name);
     setDescription(cleanValues.description);
+    setImage(cleanValues.image);
     setErrors({});
   };
   const [noteRecord, setNoteRecord] = React.useState(noteModelProp);
@@ -46,7 +48,7 @@ export default function NoteUpdateForm(props) {
     const queryData = async () => {
       const record = idProp
         ? (
-            await client.graphql({
+            await API.graphql({
               query: getNote.replaceAll("__typename", ""),
               variables: { id: idProp },
             })
@@ -60,6 +62,7 @@ export default function NoteUpdateForm(props) {
   const validations = {
     name: [{ type: "Required" }],
     description: [],
+    image: [],
   };
   const runValidationTasks = async (
     fieldName,
@@ -89,6 +92,7 @@ export default function NoteUpdateForm(props) {
         let modelFields = {
           name,
           description: description ?? null,
+          image: image ?? null,
         };
         const validationResponses = await Promise.all(
           Object.keys(validations).reduce((promises, fieldName) => {
@@ -118,7 +122,7 @@ export default function NoteUpdateForm(props) {
               modelFields[key] = null;
             }
           });
-          await client.graphql({
+          await API.graphql({
             query: updateNote.replaceAll("__typename", ""),
             variables: {
               input: {
@@ -151,6 +155,7 @@ export default function NoteUpdateForm(props) {
             const modelFields = {
               name: value,
               description,
+              image,
             };
             const result = onChange(modelFields);
             value = result?.name ?? value;
@@ -176,6 +181,7 @@ export default function NoteUpdateForm(props) {
             const modelFields = {
               name,
               description: value,
+              image,
             };
             const result = onChange(modelFields);
             value = result?.description ?? value;
@@ -189,6 +195,32 @@ export default function NoteUpdateForm(props) {
         errorMessage={errors.description?.errorMessage}
         hasError={errors.description?.hasError}
         {...getOverrideProps(overrides, "description")}
+      ></TextField>
+      <TextField
+        label="Image"
+        isRequired={false}
+        isReadOnly={false}
+        value={image}
+        onChange={(e) => {
+          let { value } = e.target;
+          if (onChange) {
+            const modelFields = {
+              name,
+              description,
+              image: value,
+            };
+            const result = onChange(modelFields);
+            value = result?.image ?? value;
+          }
+          if (errors.image?.hasError) {
+            runValidationTasks("image", value);
+          }
+          setImage(value);
+        }}
+        onBlur={() => runValidationTasks("image", image)}
+        errorMessage={errors.image?.errorMessage}
+        hasError={errors.image?.hasError}
+        {...getOverrideProps(overrides, "image")}
       ></TextField>
       <Flex
         justifyContent="space-between"

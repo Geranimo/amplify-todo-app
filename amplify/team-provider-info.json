@@ -17,6 +17,9 @@
       },
       "api": {
         "amplifytodoapp": {}
+      },
+      "storage": {
+        "imagestorage": {}
       }
     }
   }
