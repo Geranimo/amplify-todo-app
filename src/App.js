@@ -28,6 +28,7 @@ const App = ({ signOut }) => {
   async function fetchNotes() {
     const apiData = await API.graphql({ query: listNotes });
     const notesFromAPI = apiData.data.listNotes.items;
+    try {
     await Promise.all(
       notesFromAPI.map(async (note) => {
         if (note.image) {
@@ -37,6 +38,9 @@ const App = ({ signOut }) => {
         return note;
       })
     );
+    } catch(e){
+      console.log(e)
+    }
     setNotes(notesFromAPI);
   }
 
@@ -90,11 +94,11 @@ const App = ({ signOut }) => {
             required
           />
           <View
-            name="image"
-            as="input"
-            type="file"
-            style={{ alignSelf: "end" }}
-          />
+  name="image"
+  as="input"
+  type="file"
+  style={{ alignSelf: "end" }}
+/>
           <Button type="submit" variation="primary">
             Create Note
           </Button>
