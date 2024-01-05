@@ -12,6 +12,8 @@ export const onCreateNote = /* GraphQL */ `
       description
       image
       owner
+      status
+      completionDate
       createdAt
       updatedAt
       __typename
@@ -29,6 +31,8 @@ export const onUpdateNote = /* GraphQL */ `
       description
       image
       owner
+      status
+      completionDate
       createdAt
       updatedAt
       __typename
@@ -46,6 +50,8 @@ export const onDeleteNote = /* GraphQL */ `
       description
       image
       owner
+      status
+      completionDate
       createdAt
       updatedAt
       __typename

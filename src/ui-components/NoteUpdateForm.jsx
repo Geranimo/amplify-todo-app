@@ -6,7 +6,13 @@
 
 /* eslint-disable */
 import * as React from "react";
-import { Button, Flex, Grid, TextField } from "@aws-amplify/ui-react";
+import {
+  Button,
+  Flex,
+  Grid,
+  SelectField,
+  TextField,
+} from "@aws-amplify/ui-react";
 import { fetchByPath, getOverrideProps, validateField } from "./utils";
 import { API } from "aws-amplify";
 import { getNote } from "../graphql/queries";
@@ -28,6 +34,8 @@ export default function NoteUpdateForm(props) {
     description: "",
     image: "",
     owner: "",
+    status: "",
+    completionDate: "",
   };
   const [name, setName] = React.useState(initialValues.name);
   const [description, setDescription] = React.useState(
@@ -35,6 +43,10 @@ export default function NoteUpdateForm(props) {
   );
   const [image, setImage] = React.useState(initialValues.image);
   const [owner, setOwner] = React.useState(initialValues.owner);
+  const [status, setStatus] = React.useState(initialValues.status);
+  const [completionDate, setCompletionDate] = React.useState(
+    initialValues.completionDate
+  );
   const [errors, setErrors] = React.useState({});
   const resetStateValues = () => {
     const cleanValues = noteRecord
@@ -44,6 +56,8 @@ export default function NoteUpdateForm(props) {
     setDescription(cleanValues.description);
     setImage(cleanValues.image);
     setOwner(cleanValues.owner);
+    setStatus(cleanValues.status);
+    setCompletionDate(cleanValues.completionDate);
     setErrors({});
   };
   const [noteRecord, setNoteRecord] = React.useState(noteModelProp);
@@ -67,6 +81,8 @@ export default function NoteUpdateForm(props) {
     description: [],
     image: [],
     owner: [],
+    status: [],
+    completionDate: [],
   };
   const runValidationTasks = async (
     fieldName,
@@ -98,6 +114,8 @@ export default function NoteUpdateForm(props) {
           description: description ?? null,
           image: image ?? null,
           owner: owner ?? null,
+          status: status ?? null,
+          completionDate: completionDate ?? null,
         };
         const validationResponses = await Promise.all(
           Object.keys(validations).reduce((promises, fieldName) => {
@@ -162,6 +180,8 @@ export default function NoteUpdateForm(props) {
               description,
               image,
               owner,
+              status,
+              completionDate,
             };
             const result = onChange(modelFields);
             value = result?.name ?? value;
@@ -189,6 +209,8 @@ export default function NoteUpdateForm(props) {
               description: value,
               image,
               owner,
+              status,
+              completionDate,
             };
             const result = onChange(modelFields);
             value = result?.description ?? value;
@@ -216,6 +238,8 @@ export default function NoteUpdateForm(props) {
               description,
               image: value,
               owner,
+              status,
+              completionDate,
             };
             const result = onChange(modelFields);
             value = result?.image ?? value;
@@ -243,6 +267,8 @@ export default function NoteUpdateForm(props) {
               description,
               image,
               owner: value,
+              status,
+              completionDate,
             };
             const result = onChange(modelFields);
             value = result?.owner ?? value;
@@ -256,6 +282,76 @@ export default function NoteUpdateForm(props) {
         errorMessage={errors.owner?.errorMessage}
         hasError={errors.owner?.hasError}
         {...getOverrideProps(overrides, "owner")}
+      ></TextField>
+      <SelectField
+        label="Status"
+        placeholder="Please select an option"
+        isDisabled={false}
+        value={status}
+        onChange={(e) => {
+          let { value } = e.target;
+          if (onChange) {
+            const modelFields = {
+              name,
+              description,
+              image,
+              owner,
+              status: value,
+              completionDate,
+            };
+            const result = onChange(modelFields);
+            value = result?.status ?? value;
+          }
+          if (errors.status?.hasError) {
+            runValidationTasks("status", value);
+          }
+          setStatus(value);
+        }}
+        onBlur={() => runValidationTasks("status", status)}
+        errorMessage={errors.status?.errorMessage}
+        hasError={errors.status?.hasError}
+        {...getOverrideProps(overrides, "status")}
+      >
+        <option
+          children="In progress"
+          value="InProgress"
+          {...getOverrideProps(overrides, "statusoption0")}
+        ></option>
+        <option
+          children="Completed"
+          value="Completed"
+          {...getOverrideProps(overrides, "statusoption1")}
+        ></option>
+      </SelectField>
+      <TextField
+        label="Completion date"
+        isRequired={false}
+        isReadOnly={false}
+        type="date"
+        value={completionDate}
+        onChange={(e) => {
+          let { value } = e.target;
+          if (onChange) {
+            const modelFields = {
+              name,
+              description,
+              image,
+              owner,
+              status,
+              completionDate: value,
+            };
+            const result = onChange(modelFields);
+            value = result?.completionDate ?? value;
+          }
+          if (errors.completionDate?.hasError) {
+            runValidationTasks("completionDate", value);
+          }
+          setCompletionDate(value);
+        }}
+        onBlur={() => runValidationTasks("completionDate", completionDate)}
+        errorMessage={errors.completionDate?.errorMessage}
+        hasError={errors.completionDate?.hasError}
+        {...getOverrideProps(overrides, "completionDate")}
       ></TextField>
       <Flex
         justifyContent="space-between"
