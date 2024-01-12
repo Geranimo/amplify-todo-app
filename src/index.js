@@ -1,16 +1,23 @@
-
-import { Amplify } from 'aws-amplify';
-import config from './aws-exports';
-import React from 'react';
-import ReactDOM from 'react-dom/client';
-import './index.css';
-import App from './App';
-import reportWebVitals from './reportWebVitals';
-
+import { Amplify } from "aws-amplify";
+import config from "./aws-exports";
+import React from "react";
+import ReactDOM from "react-dom/client";
+import "./index.css";
+import App from "./App";
+import reportWebVitals from "./reportWebVitals";
+import { Tabs } from "@aws-amplify/ui-react";
 Amplify.configure(config);
-const root = ReactDOM.createRoot(document.getElementById('root'));
+const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
   <React.StrictMode>
+    <Tabs
+      defaultValue={"Tab 1"}
+      items={[
+        { label: "Tab 1", value: "Tab 1", content: "Tab content #1" },
+        { label: "Tab 2", value: "Tab 2", content: "Tab content #2" },
+        { label: "Tab 3", value: "Tab 3", content: "Tab content #3" },
+      ]}
+    />
     <App />
   </React.StrictMode>
 );

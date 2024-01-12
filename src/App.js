@@ -13,7 +13,6 @@ import {
   withAuthenticator,
   ToggleButton,
   CheckboxField,
-  Tabs,
   Collection,
   Badge,
   Divider,
@@ -99,26 +98,20 @@ const App = ({ signOut }) => {
   }
 
   return (
-    <View className="App">
-      <Tabs
-        justifyContent="flex-start"
-        defaultValue="Tab 1"
-        items={[
-          { label: "Tab 1", value: "Tab 1", content: "Tab content #1" },
-          { label: "Tab 2", value: "Tab 2", content: "Tab content #2" },
-          {
-            label: "Disabled tab",
-            value: "Tab 3",
-            content: "Tab content #3",
-            isDisabled: true,
-          },
-        ]}
-      />
-      <Button onClick={signOut}>Sign Out</Button>
-      <Heading level={1}>PersonalNotesApp</Heading>
+    <View className="App" marginTop={20}>
+      <Button
+        onClick={signOut}
+        variation="primary"
+        size="large"
+        alignSelf="end"
+      >
+        Sign Out
+      </Button>
+
       <View as="form" margin="3rem 0" onSubmit={createNote}>
-        <Flex direction="row" justifyContent="center">
+        <Flex direction="row" justifyContent="left">
           <Flex direction="column" alignContent="flex-start">
+            <Heading level={2}>Add a Note</Heading>
             <TextField
               name="name"
               placeholder="Note Name"
@@ -160,58 +153,63 @@ const App = ({ signOut }) => {
               Create Note
             </Button>
           </Flex>
+          <Flex direction="column" alignContent="flex-start">
+            <Heading level={3}>You got things to do !</Heading>
+            <Collection
+              items={notes}
+              type="list"
+              direction="row"
+              gap="20px"
+              wrap="nowrap"
+            >
+              {(item, index) => (
+                <Card
+                  key={index}
+                  borderRadius="medium"
+                  maxWidth="20rem"
+                  variation="outlined"
+                >
+                  <Image
+                    src={item.image}
+                    alt="You task would be awesome with an picture"
+                    sizes="medium"
+                  />
+                  <View padding="xs">
+                    <Flex>
+                      <Badge
+                        backgroundColor={
+                          item.status === "Completed" ? "green.40" : "yellow.20"
+                        }
+                      >
+                        {item.status}
+                      </Badge>
+                    </Flex>
+                    <Divider padding="xs" />
+                    <Heading padding="medium">{item.name}</Heading>
+                    <ToggleButton
+                      size="small"
+                      onClick={() => toggleStatus(item)}
+                    >
+                      {item.status === "InProgress"
+                        ? "Mark Complete"
+                        : "ReOpen Task"}
+                    </ToggleButton>
+                    <Button
+                      variation="link"
+                      onClick={() => deleteNote(item)}
+                      color="red.40"
+                      size="small"
+                      colorTheme=""
+                    >
+                      Delete note
+                    </Button>
+                  </View>
+                </Card>
+              )}
+            </Collection>
+          </Flex>
         </Flex>
       </View>
-      <Divider />
-      <Heading level={3}>ToDo List</Heading>
-
-      <Collection
-        items={notes}
-        type="list"
-        direction="row"
-        gap="20px"
-        wrap="nowrap"
-      >
-        {(item, index) => (
-          <Card
-            key={index}
-            borderRadius="medium"
-            maxWidth="20rem"
-            variation="outlined"
-          >
-            <Image
-              src={item.image}
-              alt="You task would be awesome with an picture"
-              sizes="medium"
-            />
-            <View padding="xs">
-              <Flex>
-                <Badge
-                  backgroundColor={
-                    item.status === "Completed" ? "green.40" : "yellow.20"
-                  }
-                >
-                  {item.status}
-                </Badge>
-              </Flex>
-              <Divider padding="xs" />
-              <Heading padding="medium">{item.name}</Heading>
-              <ToggleButton size="small" onClick={() => toggleStatus(item)}>
-                {item.status === "InProgress" ? "Mark Complete" : "ReOpen Task"}
-              </ToggleButton>
-              <Button
-                variation="link"
-                onClick={() => deleteNote(item)}
-                color="red.40"
-                size="small"
-                colorTheme=""
-              >
-                Delete note
-              </Button>
-            </View>
-          </Card>
-        )}
-      </Collection>
     </View>
   );
 };
