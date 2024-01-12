@@ -8,26 +8,26 @@ import {
   Flex,
   Heading,
   Image,
-  Text,
   TextField,
   View,
   withAuthenticator,
   ToggleButton,
   CheckboxField,
-
+  Tabs,
+  Collection,
+  Badge,
+  Divider,
 } from "@aws-amplify/ui-react";
 import { listNotes } from "./graphql/queries";
 import {
   createNote as createNoteMutation,
   deleteNote as deleteNoteMutation,
-  updateNote as updateNoteMutation
+  updateNote as updateNoteMutation,
 } from "./graphql/mutations";
-Storage.configure({ level: 'private' });
+Storage.configure({ level: "private" });
 
 const App = ({ signOut }) => {
   const [notes, setNotes] = useState([]);
-  const [isOpen, setIsOpen] = useState({});
-
   useEffect(() => {
     fetchNotes();
   }, []);
@@ -46,7 +46,7 @@ const App = ({ signOut }) => {
         })
       );
     } catch (e) {
-      console.log(e)
+      console.log(e);
     }
     setNotes(notesFromAPI);
   }
@@ -60,7 +60,7 @@ const App = ({ signOut }) => {
       description: form.get("description"),
       image: image.name,
       completionDate: form.get("completionDate"),
-      status: "InProgress"
+      status: "InProgress",
     };
     if (!!data.image) await Storage.put(data.name, image);
     await API.graphql({
@@ -81,25 +81,40 @@ const App = ({ signOut }) => {
     });
   }
 
-  async function toggleOpen(note) {
-    setIsOpen({
-      ...isOpen,
-      [note.id]: !isOpen[note.id],
-    });
-    const newNote = {
-      id: note.id,
-      status: "Completed"
-    }
-    newNote.status = "Completed"
+  async function toggleStatus(note) {
+    const currentNote = notes.filter((item) => item.id === note.id)[0];
+    console.log("SelectedNote", currentNote);
+    const newState =
+      currentNote.status === "Completed" ? "InProgress" : "Completed";
     await API.graphql({
       query: updateNoteMutation,
-      variables: { input: newNote },
+      variables: {
+        input: {
+          id: note.id,
+          status: newState,
+        },
+      },
     });
     fetchNotes();
-  };
+  }
 
   return (
     <View className="App">
+      <Tabs
+        justifyContent="flex-start"
+        defaultValue="Tab 1"
+        items={[
+          { label: "Tab 1", value: "Tab 1", content: "Tab content #1" },
+          { label: "Tab 2", value: "Tab 2", content: "Tab content #2" },
+          {
+            label: "Disabled tab",
+            value: "Tab 3",
+            content: "Tab content #3",
+            isDisabled: true,
+          },
+        ]}
+      />
+      <Button onClick={signOut}>Sign Out</Button>
       <Heading level={1}>PersonalNotesApp</Heading>
       <View as="form" margin="3rem 0" onSubmit={createNote}>
         <Flex direction="row" justifyContent="center">
@@ -121,8 +136,12 @@ const App = ({ signOut }) => {
               required
             />
             <TextField
-              name="completionDate" label="CompleteAt" labelHidden type="date"
-              variation="quiet" />
+              name="completionDate"
+              label="CompleteAt"
+              labelHidden
+              type="date"
+              variation="quiet"
+            />
             <CheckboxField
               name="addReminder"
               label="addReminder"
@@ -141,48 +160,58 @@ const App = ({ signOut }) => {
               Create Note
             </Button>
           </Flex>
-
         </Flex>
       </View>
-      <Heading level={
-        3}>NoteList</Heading>
-      <View margin="3rem 0">
+      <Divider />
+      <Heading level={3}>ToDo List</Heading>
 
-        {notes.map((note) => (
-          <Card>
-            <Flex
-              key={note.id || note.name}
-              direction="row"
-              justifyContent="center"
-              alignItems="flex-strat"
-            >
-              {note.image && (
-                <Image
-                  src={note.image}
-                  alt={`visual aid for ${notes.name}`}
-                  style={{ width: 200, height: 200 }}
-                />
-              )}
-              <Flex
-                direction="column" alignItems="flex-start">
-                <Text as="strong" fontWeight={700}>
-                  {note.name}
-                </Text>
-                <Text as="span">{note.description}</Text>
-                <Text as="span">{note.status}</Text>
-                <Text as="span">{note.completionDate}</Text>
-
-                <Button variation="link" onClick={() => deleteNote(note)}>
-                  Delete note
-                </Button>
-                <ToggleButton size="small" onClick={() => toggleOpen(note)} >Complete Task</ToggleButton>
+      <Collection
+        items={notes}
+        type="list"
+        direction="row"
+        gap="20px"
+        wrap="nowrap"
+      >
+        {(item, index) => (
+          <Card
+            key={index}
+            borderRadius="medium"
+            maxWidth="20rem"
+            variation="outlined"
+          >
+            <Image
+              src={item.image}
+              alt="You task would be awesome with an picture"
+              sizes="medium"
+            />
+            <View padding="xs">
+              <Flex>
+                <Badge
+                  backgroundColor={
+                    item.status === "Completed" ? "green.40" : "yellow.20"
+                  }
+                >
+                  {item.status}
+                </Badge>
               </Flex>
-            </Flex>
+              <Divider padding="xs" />
+              <Heading padding="medium">{item.name}</Heading>
+              <ToggleButton size="small" onClick={() => toggleStatus(item)}>
+                {item.status === "InProgress" ? "Mark Complete" : "ReOpen Task"}
+              </ToggleButton>
+              <Button
+                variation="link"
+                onClick={() => deleteNote(item)}
+                color="red.40"
+                size="small"
+                colorTheme=""
+              >
+                Delete note
+              </Button>
+            </View>
           </Card>
-        ))}
-
-      </View>
-      <Button onClick={signOut}>Sign Out</Button>
+        )}
+      </Collection>
     </View>
   );
 };
